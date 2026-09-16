@@ -16,5 +16,7 @@ def parse_input(reply : str):
 
     return ("action", tool, tool_input)
 
-# print(parse_input("Thought: I multiply.\nAction: calculator\nAction Input: 47 * 89"))
-# print(parse_input("Thought: Done.\nFinal Answer: 66"))
+if __name__ == "__main__":
+    print(parse_input("Thought: I multiply.\nAction: calculator\nAction Input: 47 * 89"))
+    print(parse_input("Thought: Done.\nFinal Answer: 66"))
+    print(parse_input("garbage text"))
