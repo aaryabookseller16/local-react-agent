@@ -110,6 +110,49 @@ def read_file(requested_path):
 
     return ""
 
+def list_directory(requested_path="."):
+    """List entries in a directory inside the project. Read only, allow-listed."""
+    ALLOWED_DIRECTORY = Path(__file__).parent.resolve()
+    try:
+        full = (ALLOWED_DIRECTORY / Path(requested_path)).resolve()
+    except (TypeError, ValueError, OSError, RuntimeError):
+        return f"Please submit a path inside {ALLOWED_DIRECTORY}"
+    if not full.is_relative_to(ALLOWED_DIRECTORY):
+        return f"Please submit a path inside {ALLOWED_DIRECTORY}"
+    try:
+        if not full.is_dir():
+            return f"{requested_path} is not a directory inside {ALLOWED_DIRECTORY}"
+        entries = []
+        for p in sorted(full.iterdir()):
+            kind = "dir" if p.is_dir() else "file"
+            try:
+                size = p.stat().st_size
+            except OSError:
+                size = 0
+            entries.append(f"{kind}\t{size}\t{p.name}")
+    except OSError:
+        return "that directory isn't readable"
+    return "\n".join(entries) if entries else "(empty directory)"
+
+
+def search_files(pattern):
+    """Find files by name or glob pattern recursively inside the project. Read only, allow-listed."""
+    ALLOWED_DIRECTORY = Path(__file__).parent.resolve()
+    if not isinstance(pattern, str) or not pattern.strip():
+        return "Please provide a filename pattern, for example '*.py'"
+    matches = []
+    try:
+        for p in ALLOWED_DIRECTORY.rglob(pattern):
+            try:
+                rel = p.relative_to(ALLOWED_DIRECTORY)
+            except ValueError:
+                continue
+            matches.append(str(rel))
+    except (OSError, ValueError) as e:
+        return f"Error searching for {pattern!r} ({e})"
+    return "\n".join(sorted(matches)) if matches else f"No files matching {pattern!r}"
+
+
 if __name__ == "__main__":
     print(read_file("todo.txt"))
     print(read_file("../secrets.txt"))

@@ -67,6 +67,8 @@ Neither replaces the other.
 
 Reading never gates building, but implementation alone is also insufficient for foundational topics.
 
+I have access to O'Reilly Online Learning. Use the linked books below as targeted references: read the named chapter or concept when the matching subtask is active, try one small experiment, then return to the build. A book recommendation does not mean reading it cover to cover or adding a new prerequisite.
+
 For foundational concepts:
 
 ```
@@ -230,6 +232,7 @@ A chat loop — the base program shape everything else runs inside. Keeps a stat
 **Resources**
 - [Python Tutorial](https://docs.python.org/3/tutorial/) — Data structures, Functions, Modules, Exceptions
 - [Pro Git](https://git-scm.com/book/en/v2) — Chapters 1–3, for the commit-often habit this whole project runs on
+- [Architecture Patterns with Python](https://www.oreilly.com/library/view/architecture-patterns-with/9781492052197/) — Introduction on encapsulation, abstraction, and separating responsibilities; revisit only if the loop becomes hard to change
 
 **Implement**
 - [x] Stateful `messages` list
@@ -245,6 +248,7 @@ The ReAct format prompt and its parser. Turns the model's free-text reply into a
 
 **Resources**
 - [ReAct paper](https://arxiv.org/abs/2210.03629) — the reasoning/action/observation loop this format implements
+- [AI Engineering](https://www.oreilly.com/library/view/ai-engineering/9781098166298/) — Chapter 6, agents/tools and failure modes; compare its agent loop to the hand-written one after implementing it
 
 **Implement**
 - [x] ReAct-format system prompt (Thought/Action/Action Input / Thought/Final Answer)
@@ -324,6 +328,7 @@ A local model can receive a task, choose the calculator, execute it through the 
 **Resources**
 - [Linux Journey](https://linuxjourney.com/) — Command Line, Text-Fu, Permissions
 - [Python `pathlib` docs](https://docs.python.org/3/library/pathlib.html)
+- [Linux Pocket Guide, 4th Edition](https://www.oreilly.com/library/view/linux-pocket-guide/9781098157951/) — Chapter 1 on filesystem layout, users, and permissions; use its file/search command sections alongside `list_directory` and `search_files`
 
 **Implement**
 - [x] Handle bad paths
@@ -425,6 +430,8 @@ A relational schema (PostgreSQL) that stores conversations and messages so state
 **Resources**
 - [PostgreSQL Tutorial](https://www.postgresql.org/docs/current/tutorial.html)
 - [SQLBolt](https://sqlbolt.com/)
+- [Learning SQL, 3rd Edition](https://www.oreilly.com/library/view/learning-sql-3rd/9781492057604/) — relational model, tables, queries, joins, and indexes; write each relevant example against PostgreSQL because the book's examples use MySQL
+- [Designing Data-Intensive Applications, 2nd Edition](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781098119058/) — Chapters 3–4 on data models and storage/retrieval; connect schema and index choices to the agent's actual queries
 
 **Implement**
 - [ ] Design the Conversation/Message schema
@@ -444,6 +451,7 @@ pgvector-backed retrieval of relevant prior interactions, plus a bounded experim
 **Resources**
 - [pgvector](https://github.com/pgvector/pgvector) — start with exact vector search, don't jump to approximate indexing
 - [Embeddings — Google ML Crash Course](https://developers.google.com/machine-learning/crash-course/embeddings)
+- [Hands-On Large Language Models](https://www.oreilly.com/library/view/hands-on-large-language/9781098150952/) — Chapters 2 and 8 on embeddings, semantic search, ranking, and retrieval evaluation; use them to design the flat-vector vs. summary-buffer comparison
 
 **Implement**
 - [ ] 768-dimensional embeddings via `nomic-embed-text` (Ollama embeddings)
@@ -489,6 +497,7 @@ Extend the agent loop to handle tasks that need multiple tools in sequence (e.g.
 **Resources**
 - [Game Programming Patterns — State](https://gameprogrammingpatterns.com/state.html) — focus on the pattern, not game dev
 - [ReAct paper](https://arxiv.org/abs/2210.03629) — revisit, now comparing the paper's loop to the actual system you built
+- [Architecture Patterns with Python](https://www.oreilly.com/library/view/architecture-patterns-with/9781492052197/) — Introduction and the command/message-bus sections for explicit state, dispatch, and failure boundaries; borrow the ideas only where they simplify this loop
 
 **Implement**
 - [ ] Loop supports calling more than one tool per task before a Final Answer
@@ -561,6 +570,7 @@ Run risky tool execution inside a Docker container instead of directly on the ho
 - [iximiuz Labs](https://labs.iximiuz.com) — PRIMARY; focus on containers, container images, filesystems
 - [Docker Get Started](https://docs.docker.com/get-started/)
 - Liz Rice — **Containers From Scratch** (watch after basic Docker familiarity)
+- [Container Security](https://www.oreilly.com/library/view/container-security/9781492056690/) — Chapters 1–2 and 4 on the threat model, permissions/capabilities, and container isolation; relate each boundary to the Docker configuration you test
 
 **Implement**
 - [ ] Run tool execution inside a Docker container
@@ -686,6 +696,7 @@ Tasks with checkable, pass/fail outcomes that one command can run, so changes ge
 **Resources**
 - [pytest — Getting Started](https://docs.pytest.org/en/stable/getting-started.html)
 - [Software Engineering at Google — Testing Overview](https://abseil.io/resources/swe-book/html/ch11.html)
+- [AI Engineering](https://www.oreilly.com/library/view/ai-engineering/9781098166298/) — Chapter 4 on evaluation design; turn its component-level evaluation ideas into checkable agent tasks and a saved baseline
 
 **Implement**
 - [ ] Task definitions with checkable outcomes
@@ -719,6 +730,7 @@ Map agent steps to OpenTelemetry spans, so a run's execution path is visible as 
 - [OpenTelemetry docs](https://opentelemetry.io/docs/)
 - [OpenTelemetry — Python](https://opentelemetry.io/docs/languages/python/)
 - [OpenTelemetry — Tracing](https://opentelemetry.io/docs/concepts/signals/traces/)
+- [Observability Engineering, 2nd Edition](https://www.oreilly.com/library/view/observability-engineering-2nd/9781098179915/) — Chapters 4–5 and 7 on instrumentation, structured events, and OpenTelemetry; use a failing trajectory to decide which span attributes and events answer useful debugging questions
 
 **Implement**
 - [ ] Map agent steps to OTel spans where appropriate
@@ -770,6 +782,7 @@ Fan out N agent runs concurrently using `asyncio`, and collect their results, in
 **Resources**
 - [asyncio conceptual overview](https://docs.python.org/3/howto/a-conceptual-overview-of-asyncio.html) — read before using asyncio heavily
 - [asyncio documentation](https://docs.python.org/3/library/asyncio.html) — coroutines, tasks, task groups, queues, synchronization
+- [Using Asyncio in Python](https://www.oreilly.com/library/view/using-asyncio-in/9781492075325/) — Chapters 1–3 for the event-loop mental model, threads vs. coroutines, tasks, and futures; implement fan-out with current Python APIs from the docs
 
 **Implement**
 - [ ] Fan out N agent runs with `asyncio`
@@ -785,6 +798,7 @@ Timeouts at three levels — tool call, task loop, sandbox lifetime — plus han
 
 **Resources**
 - [asyncio documentation](https://docs.python.org/3/library/asyncio.html) — cancellation, timeouts
+- [Designing Data-Intensive Applications, 2nd Edition](https://www.oreilly.com/library/view/designing-data-intensive-applications/9781098119058/) — selected reliability/fault-tolerance sections as a mental model for partial failures; apply only the patterns that fit local workers
 
 **Implement**
 - [ ] Tool-call timeout
@@ -1001,6 +1015,7 @@ Cancellation support plus a private network path (Tailscale or equivalent, SSH) 
 **Resources**
 - [Tailscale docs](https://tailscale.com/kb)
 - [Beej's Guide to Network Concepts](https://beej.us/guide/bgnet/)
+- [Building Secure and Reliable Systems](https://www.oreilly.com/library/view/building-secure-and/9781492083115/) — introductory security/reliability design and access-control sections; threat-model the remote API and its credentials before exposing it to another device
 
 **Implement**
 - [ ] Cancellation endpoint
@@ -1040,6 +1055,7 @@ Create namespaces manually and inspect container processes from the host and via
 **Resources**
 - [iximiuz Labs](https://labs.iximiuz.com) — primary hands-on
 - [Linux Insides](https://0xax.gitbooks.io/linux-insides/)
+- [Container Security](https://www.oreilly.com/library/view/container-security/9781492056690/) — Linux system calls, capabilities, namespaces, and cgroups; use it to explain the mechanisms observed in the labs
 
 **Implement**
 - [ ] Create namespaces manually
@@ -1114,6 +1130,7 @@ Cluster, control plane, node, pod, deployment, and service — the objects neede
 - [Kubernetes Concepts](https://kubernetes.io/docs/concepts/overview/)
 - [Kubernetes Components](https://kubernetes.io/docs/concepts/overview/components/)
 - [Kubernetes Pods](https://kubernetes.io/docs/concepts/workloads/pods/)
+- [Kubernetes: Up and Running, 3rd Edition](https://www.oreilly.com/library/view/kubernetes-up-and/9781098110192/) — introduction and core-object chapters for desired state, pods, deployments, and services; keep the local cluster as the source of truth for behavior
 
 **Implement**
 - [ ] Set up a local cluster (kind or minikube)
@@ -1197,6 +1214,7 @@ Terraform (or equivalent) to make the deployment reproducible, plus the actual s
 **Resources**
 - [Terraform tutorials](https://developer.hashicorp.com/terraform/tutorials)
 - [Docker Compose — Getting Started](https://docs.docker.com/compose/gettingstarted/)
+- [Terraform: Up and Running, 3rd Edition](https://www.oreilly.com/library/view/terraform-up-and/9781098116736/) — initial infrastructure-as-code and state chapters; compare the declared VM/network resources with what the cloud provider actually created
 
 **Implement**
 - [ ] Infrastructure defined as code (Terraform)
@@ -1346,6 +1364,7 @@ Measure model latency, throughput, VRAM, RAM, and behavior under concurrent requ
 - [NVIDIA CUDA documentation](https://docs.nvidia.com/cuda/) — conceptual material first
 - [Hugging Face documentation](https://huggingface.co/docs)
 - Systems Performance — Brendan Gregg (latency, throughput, utilization, saturation, profiling sections)
+- [AI Engineering](https://www.oreilly.com/library/view/ai-engineering/9781098166298/) — Chapter 9 on inference optimization; use the latency/throughput tradeoffs to frame the Ollama measurement before comparing servers
 
 **Implement**
 - [ ] Measure model latency and throughput
