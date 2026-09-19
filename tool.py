@@ -153,6 +153,48 @@ def search_files(pattern):
     return "\n".join(sorted(matches)) if matches else f"No files matching {pattern!r}"
 
 
+def extract_pdf_text(requested_path):
+    """Extract text from a PDF inside the project. Read only, allow-listed.
+
+    Returns the extracted text, or a clear error string for a missing,
+    locked, corrupt, or image-only PDF.
+    """
+    ALLOWED_DIRECTORY = Path(__file__).parent.resolve()
+    try:
+        full = (ALLOWED_DIRECTORY / Path(requested_path)).resolve()
+    except (TypeError, ValueError, OSError, RuntimeError):
+        return f"Please submit a file inside {ALLOWED_DIRECTORY}"
+    if not full.is_relative_to(ALLOWED_DIRECTORY):
+        return f"Please submit a file inside {ALLOWED_DIRECTORY}"
+    if not full.is_file():
+        return f"This file does not exist in {ALLOWED_DIRECTORY}"
+
+    try:
+        from pypdf import PdfReader
+        from pypdf.errors import PdfReadError
+    except ImportError:
+        return "pypdf is not installed; run: pip install pypdf"
+
+    try:
+        reader = PdfReader(str(full))
+        if reader.is_encrypted:
+            try:
+                if not reader.decrypt(""):
+                    return "that PDF is encrypted and needs a password"
+            except Exception:
+                return "that PDF is encrypted and needs a password"
+        parts = []
+        for page in reader.pages:
+            parts.append(page.extract_text() or "")
+        text = "\n".join(parts).strip()
+    except (PdfReadError, OSError, ValueError) as e:
+        return f"could not read that PDF ({e})"
+
+    if not text:
+        return "that PDF has no extractable text (it may be scanned images)"
+    return text
+
+
 if __name__ == "__main__":
     print(read_file("todo.txt"))
     print(read_file("../secrets.txt"))
