@@ -153,46 +153,72 @@ def search_files(pattern):
     return "\n".join(sorted(matches)) if matches else f"No files matching {pattern!r}"
 
 
+class PdfError(Exception):
+    """Raised when a PDF can't be turned into text.
+
+    The message is written for the model to read, so the MCP wrapper can
+    return str(e) directly as the tool result.
+    """
+
+
 def extract_pdf_text(requested_path):
     """Extract text from a PDF inside the project. Read only, allow-listed.
 
-    Returns the extracted text, or a clear error string for a missing,
-    locked, corrupt, or image-only PDF.
+    Returns (text, page_starts):
+        text: every page's text joined with "\\n". Not stripped, so the
+            offsets below stay valid.
+        page_starts: page_starts[i] is the character offset in `text` where
+            page i (0 indexed) begins. page_starts[0] is always 0.
+
+    To find the page of character position p:
+        bisect.bisect_right(page_starts, p) - 1   (0 indexed)
+
+    Raises PdfError for a path outside the project, a missing file, a
+    missing pypdf install, a locked or corrupt PDF, or a PDF with no
+    extractable text (for example scanned images).
     """
     ALLOWED_DIRECTORY = Path(__file__).parent.resolve()
     try:
         full = (ALLOWED_DIRECTORY / Path(requested_path)).resolve()
     except (TypeError, ValueError, OSError, RuntimeError):
-        return f"Please submit a file inside {ALLOWED_DIRECTORY}"
+        raise PdfError(f"Please submit a file inside {ALLOWED_DIRECTORY}")
     if not full.is_relative_to(ALLOWED_DIRECTORY):
-        return f"Please submit a file inside {ALLOWED_DIRECTORY}"
+        raise PdfError(f"Please submit a file inside {ALLOWED_DIRECTORY}")
     if not full.is_file():
-        return f"This file does not exist in {ALLOWED_DIRECTORY}"
+        raise PdfError(f"This file does not exist in {ALLOWED_DIRECTORY}")
 
     try:
         from pypdf import PdfReader
         from pypdf.errors import PdfReadError
     except ImportError:
-        return "pypdf is not installed; run: pip install pypdf"
+        raise PdfError("pypdf is not installed; run: pip install pypdf")
 
     try:
         reader = PdfReader(str(full))
         if reader.is_encrypted:
             try:
                 if not reader.decrypt(""):
-                    return "that PDF is encrypted and needs a password"
+                    raise PdfError("that PDF is encrypted and needs a password")
+            except PdfError:
+                raise
             except Exception:
-                return "that PDF is encrypted and needs a password"
-        parts = []
-        for page in reader.pages:
-            parts.append(page.extract_text() or "")
-        text = "\n".join(parts).strip()
-    except (PdfReadError, OSError, ValueError) as e:
-        return f"could not read that PDF ({e})"
+                raise PdfError("that PDF is encrypted and needs a password")
 
-    if not text:
-        return "that PDF has no extractable text (it may be scanned images)"
-    return text
+        pages = []
+        page_starts = []
+        offset = 0
+        for page in reader.pages:
+            page_text = page.extract_text() or ""
+            page_starts.append(offset)
+            pages.append(page_text)
+            offset += len(page_text) + 1  # +1 for the "\n" join separator
+        text = "\n".join(pages)
+    except (PdfReadError, OSError, ValueError) as e:
+        raise PdfError(f"could not read that PDF ({e})") from e
+
+    if not text.strip():
+        raise PdfError("that PDF has no extractable text (it may be scanned images)")
+    return text, page_starts
 
 
 if __name__ == "__main__":
