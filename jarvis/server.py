@@ -1,5 +1,5 @@
 from mcp.server import MCPServer
-from tool import calculator as _calculator, read_file as _read_file, list_directory as _list_directory, search_files as _search_files
+from jarvis.tool import calculator as _calculator, read_file as _read_file, list_directory as _list_directory, search_files as _search_files
 
 mcp = MCPServer("jarvis-tools")
 
@@ -10,7 +10,7 @@ def calculator(expression: str) -> str:
 
 @mcp.tool()
 def read_file(requested_path: str) -> str:
-    """Read a text file inside the project directory. Pass a path relative to the project, for example 'todo.txt'."""
+    """Read a text file inside the project directory. Pass a path relative to the project, for example 'README.md'."""
     return _read_file(requested_path)
 
 @mcp.tool()
@@ -20,7 +20,7 @@ def list_directory(path: str = ".") -> str:
 
 @mcp.tool()
 def search_files(pattern: str) -> str:
-    """Find files by name or glob pattern (for example '*.py' or 'todo*') recursively inside the project directory. Returns matching paths relative to the project."""
+    """Find files by name or glob pattern (for example '*.py' or 'READ*') recursively inside the project directory. Returns matching paths relative to the project."""
     return _search_files(pattern)
 
 

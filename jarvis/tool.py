@@ -1,18 +1,21 @@
 """Calculator tool for the ReAct agent.
- 
+
 Safely evaluates arithmetic expression strings (e.g. "47 * 89", "(3 + 4) * 2")
 WITHOUT using eval(). It parses the string into an AST and walks it, permitting
 only arithmetic node types. Anything else — function calls, names, attribute
 access, imports — raises ValueError instead of executing.
- 
+
 This replaces the earlier `return eval(action_input)` placeholder, which would
 run arbitrary Python from the model's output.
 """
- 
+
 import ast
 import operator
 from pathlib import Path
- 
+
+# Tools are sandboxed to the project root (one level above this package).
+PROJECT_ROOT = Path(__file__).parent.parent.resolve()
+
 # Allowed binary operators: AST node type -> function that performs it.
 _BIN_OPS = {
     ast.Add: operator.add,
@@ -23,25 +26,25 @@ _BIN_OPS = {
     ast.Mod: operator.mod,
     ast.Pow: operator.pow,
 }
- 
+
 # Allowed unary operators (e.g. the minus in -5).
 _UNARY_OPS = {
     ast.UAdd: operator.pos,
     ast.USub: operator.neg,
 }
- 
- 
+
+
 def _eval_node(node):
     """Recursively evaluate a single AST node, allowing only arithmetic."""
     if isinstance(node, ast.Expression):
         return _eval_node(node.body)
- 
+
     # A literal number, e.g. 47 or 3.14
     if isinstance(node, ast.Constant):
         if isinstance(node.value, (int, float)):
             return node.value
         raise ValueError(f"Unsupported constant: {node.value!r}")
- 
+
     # A binary operation, e.g. 47 * 89
     if isinstance(node, ast.BinOp):
         op_type = type(node.op)
@@ -50,21 +53,21 @@ def _eval_node(node):
         left = _eval_node(node.left)
         right = _eval_node(node.right)
         return _BIN_OPS[op_type](left, right)
- 
+
     # A unary operation, e.g. -5
     if isinstance(node, ast.UnaryOp):
         op_type = type(node.op)
         if op_type not in _UNARY_OPS:
             raise ValueError(f"Unsupported unary operator: {op_type.__name__}")
         return _UNARY_OPS[op_type](_eval_node(node.operand))
- 
+
     # Anything else (Name, Call, Attribute, etc.) is rejected.
     raise ValueError(f"Unsupported expression element: {type(node).__name__}")
- 
- 
+
+
 def calculator(action_input):
     """Evaluate an arithmetic expression string and return the numeric result.
- 
+
     Returns a string on error so the agent loop can feed it back to the model
     as an Observation instead of crashing.
     """
@@ -73,10 +76,10 @@ def calculator(action_input):
         return _eval_node(tree)
     except (ValueError, SyntaxError, TypeError, ZeroDivisionError) as e:
         return f"Error: could not evaluate {action_input!r} ({e})"
- 
+
 def read_file(requested_path):
     # 1. allowed dir as a resolved Path
-    ALLOWED_DIRECTORY = Path(__file__).parent.resolve()
+    ALLOWED_DIRECTORY = PROJECT_ROOT
 
     # 2. join with requested_path, resolve it
     try:
@@ -112,7 +115,7 @@ def read_file(requested_path):
 
 def list_directory(requested_path="."):
     """List entries in a directory inside the project. Read only, allow-listed."""
-    ALLOWED_DIRECTORY = Path(__file__).parent.resolve()
+    ALLOWED_DIRECTORY = PROJECT_ROOT
     try:
         full = (ALLOWED_DIRECTORY / Path(requested_path)).resolve()
     except (TypeError, ValueError, OSError, RuntimeError):
@@ -137,7 +140,7 @@ def list_directory(requested_path="."):
 
 def search_files(pattern):
     """Find files by name or glob pattern recursively inside the project. Read only, allow-listed."""
-    ALLOWED_DIRECTORY = Path(__file__).parent.resolve()
+    ALLOWED_DIRECTORY = PROJECT_ROOT
     if not isinstance(pattern, str) or not pattern.strip():
         return "Please provide a filename pattern, for example '*.py'"
     matches = []
@@ -161,6 +164,26 @@ class PdfError(Exception):
     """
 
 
+def resolve_in_project(requested_path):
+    """Resolve requested_path to a real file inside the project, or raise PdfError.
+
+    One place for the allow list check, so every caller (extractor, cache,
+    summarizer) enforces the same boundary. An absolute path that already
+    points inside the project is accepted, because pathlib's / operator
+    returns the absolute path unchanged.
+    """
+    ALLOWED_DIRECTORY = PROJECT_ROOT
+    try:
+        full = (ALLOWED_DIRECTORY / Path(requested_path)).resolve()
+    except (TypeError, ValueError, OSError, RuntimeError):
+        raise PdfError(f"Please submit a file inside {ALLOWED_DIRECTORY}")
+    if not full.is_relative_to(ALLOWED_DIRECTORY):
+        raise PdfError(f"Please submit a file inside {ALLOWED_DIRECTORY}")
+    if not full.is_file():
+        raise PdfError(f"This file does not exist in {ALLOWED_DIRECTORY}")
+    return full
+
+
 def extract_pdf_text(requested_path):
     """Extract text from a PDF inside the project. Read only, allow-listed.
 
@@ -177,15 +200,7 @@ def extract_pdf_text(requested_path):
     missing pypdf install, a locked or corrupt PDF, or a PDF with no
     extractable text (for example scanned images).
     """
-    ALLOWED_DIRECTORY = Path(__file__).parent.resolve()
-    try:
-        full = (ALLOWED_DIRECTORY / Path(requested_path)).resolve()
-    except (TypeError, ValueError, OSError, RuntimeError):
-        raise PdfError(f"Please submit a file inside {ALLOWED_DIRECTORY}")
-    if not full.is_relative_to(ALLOWED_DIRECTORY):
-        raise PdfError(f"Please submit a file inside {ALLOWED_DIRECTORY}")
-    if not full.is_file():
-        raise PdfError(f"This file does not exist in {ALLOWED_DIRECTORY}")
+    full = resolve_in_project(requested_path)
 
     try:
         from pypdf import PdfReader
@@ -222,7 +237,7 @@ def extract_pdf_text(requested_path):
 
 
 if __name__ == "__main__":
-    print(read_file("todo.txt"))
+    print(read_file("tests/fixtures/todo.txt"))
     print(read_file("../secrets.txt"))
     print(read_file("/etc/passwd"))
     print(read_file("does_not_exist.txt"))

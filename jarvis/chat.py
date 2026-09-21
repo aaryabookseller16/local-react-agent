@@ -4,7 +4,7 @@ import sys              # gives us sys.executable, the path to the current Pytho
 import ollama           # talks to the local model
 from mcp import ClientSession, StdioServerParameters, stdio_client  # the MCP client pieces
 
-from parser import parse_input   # your existing text parser (unchanged)
+from jarvis.parser import parse_input
 
 MODEL = "llama3.1:8b"
 
@@ -37,11 +37,11 @@ def build_system_prompt(tools):
 
 
 async def main():
-    # Recipe for starting the server: run "python server.py" with THIS same Python,
+    # Recipe for starting the server: run "python -m jarvis.server" with THIS same Python,
     # so the subprocess uses your venv. Nothing launches yet; this is just the plan.
-    server_params = StdioServerParameters(command=sys.executable, args=["server.py"])
+    server_params = StdioServerParameters(command=sys.executable, args=["-m", "jarvis.server"])
 
-    # stdio_client launches server.py as a subprocess and hands back the two pipe ends.
+    # stdio_client launches the server as a subprocess and hands back the two pipe ends.
     # async with keeps the ONE server alive for the whole chat and cleans it up on exit.
     async with stdio_client(server_params) as (read, write):
         # Wrap the raw pipe in a session so we can speak in tools, not bytes.

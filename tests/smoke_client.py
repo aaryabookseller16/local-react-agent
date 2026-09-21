@@ -7,7 +7,7 @@ from mcp import ClientSession, StdioServerParameters, stdio_client
 async def main():
     server_params = StdioServerParameters(
         command=sys.executable,   # same Python as this script, so the venv is used
-        args=["server.py"],
+        args=["-m", "jarvis.server"],
     )
 
     async with stdio_client(server_params) as (read, write):
@@ -22,7 +22,7 @@ async def main():
             calc = await session.call_tool("calculator", {"expression": "47 * 89"})
             print("calculator(47 * 89) ->", calc.content[0].text)
 
-            rf = await session.call_tool("read_file", {"requested_path": "todo.txt"})
+            rf = await session.call_tool("read_file", {"requested_path": "tests/fixtures/todo.txt"})
             print("read_file(todo.txt) ->", rf.content[0].text)
 
 
