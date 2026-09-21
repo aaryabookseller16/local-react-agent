@@ -6,7 +6,8 @@ from mcp import ClientSession, StdioServerParameters, stdio_client  # the MCP cl
 
 from agent.parser import parse_input
 
-MODEL = "llama3.1:8b"
+MODEL = "qwen2.5:14b"
+NUM_CTX = 8192   # Ollama defaults to 4096 and silently truncates past it
 
 # The fixed part of the system prompt: HOW to reply. This is scaffolding, not tool
 # info, so it is hardcoded. The tool list itself is added dynamically below.
@@ -73,7 +74,7 @@ async def main():
 
                 # Ask the model. This is where the model decides: use a tool, or answer.
                 # It is a normal blocking call (the ollama library is synchronous).
-                resp = ollama.chat(model=MODEL, messages=messages, options={"temperature": 0})
+                resp = ollama.chat(model=MODEL, messages=messages, options={"temperature": 0, "num_ctx": NUM_CTX})
                 reply = resp["message"]["content"]
                 reply_tuple = parse_input(reply)   # ("final", answer) or ("action", name, input)
 
@@ -131,7 +132,7 @@ async def main():
                     messages.append({"role": "user", "content": f"Observation: {observation}"})
 
                     # Ask the model again, now that it has seen the observation.
-                    resp = ollama.chat(model=MODEL, messages=messages, options={"temperature": 0})
+                    resp = ollama.chat(model=MODEL, messages=messages, options={"temperature": 0, "num_ctx": NUM_CTX})
                     reply = resp["message"]["content"]
                     reply_tuple = parse_input(reply)
 

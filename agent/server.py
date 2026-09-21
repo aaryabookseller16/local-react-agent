@@ -1,5 +1,7 @@
 from mcp.server import MCPServer
 from agent.tool import calculator as _calculator, read_file as _read_file, list_directory as _list_directory, search_files as _search_files
+from agent.tool import PdfError
+from agent.summarize import summarize_pdf_cached
 
 mcp = MCPServer("jarvis-tools")
 
@@ -22,6 +24,15 @@ def list_directory(path: str = ".") -> str:
 def search_files(pattern: str) -> str:
     """Find files by name or glob pattern (for example '*.py' or 'READ*') recursively inside the project directory. Returns matching paths relative to the project."""
     return _search_files(pattern)
+
+
+@mcp.tool()
+def summarize_pdf(path: str) -> str:
+    """Summarize a PDF inside the project directory. Pass a path relative to the project, for example 'paper.pdf'. Use this instead of read_file for PDFs and for any document too long to read in full. The first call on a PDF is slow because it reads the whole document; later calls are cached."""
+    try:
+        return summarize_pdf_cached(path)
+    except PdfError as e:
+        return str(e)
 
 
 if __name__ == "__main__":

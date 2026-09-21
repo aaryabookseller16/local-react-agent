@@ -13,9 +13,9 @@ import json
 from pathlib import Path
 
 from agent.chunker import chunk_text
-from agent.tool import extract_pdf_text, resolve_in_project
+from agent.tool import PROJECT_ROOT, extract_pdf_text, resolve_in_project
 
-CACHE_ROOT = Path(__file__).parent.resolve() / "cache"
+CACHE_ROOT = PROJECT_ROOT / "cache"
 
 CHUNK_SIZE = 2000
 CHUNK_OVERLAP = 200
