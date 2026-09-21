@@ -7,7 +7,7 @@ from mcp import ClientSession, StdioServerParameters, stdio_client
 async def main():
     server_params = StdioServerParameters(
         command=sys.executable,   # same Python as this script, so the venv is used
-        args=["-m", "jarvis.server"],
+        args=["-m", "agent.server"],
     )
 
     async with stdio_client(server_params) as (read, write):

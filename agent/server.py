@@ -1,5 +1,5 @@
 from mcp.server import MCPServer
-from jarvis.tool import calculator as _calculator, read_file as _read_file, list_directory as _list_directory, search_files as _search_files
+from agent.tool import calculator as _calculator, read_file as _read_file, list_directory as _list_directory, search_files as _search_files
 
 mcp = MCPServer("jarvis-tools")
 

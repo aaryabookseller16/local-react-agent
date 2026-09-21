@@ -4,10 +4,10 @@ Map and reduce are the same operation with different prompts and different
 inputs, so both go through one function: llm_call.
 """
 
-from cache import cache_dir, load_or_build_chunks, read_manifest, write_manifest
-from ollama_client import (DEFAULT_MODEL, DEFAULT_NUM_CTX, TruncationError,
+from agent.cache import cache_dir, load_or_build_chunks, read_manifest, write_manifest
+from agent.ollama_client import (DEFAULT_MODEL, DEFAULT_NUM_CTX, TruncationError,
                            input_budget_chars, llm_call)
-from tool import resolve_in_project
+from agent.tool import resolve_in_project
 
 PROMPT_VERSION = 2
 

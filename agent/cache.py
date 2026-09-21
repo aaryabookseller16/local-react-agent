@@ -12,8 +12,8 @@ import json
 
 from pathlib import Path
 
-from chunker import chunk_text
-from tool import extract_pdf_text, resolve_in_project
+from agent.chunker import chunk_text
+from agent.tool import extract_pdf_text, resolve_in_project
 
 CACHE_ROOT = Path(__file__).parent.resolve() / "cache"
 

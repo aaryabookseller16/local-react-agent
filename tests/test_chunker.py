@@ -3,7 +3,7 @@
 import random
 import string
 
-from jarvis.chunker import chunk_text, pack_greedy, split_recursive
+from agent.chunker import chunk_text, pack_greedy, split_recursive
 
 
 def make_pages(n_pages, seed=0):
